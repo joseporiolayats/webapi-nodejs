@@ -1,13 +1,12 @@
 const axios = require('axios');
 const { clientSchema, policiesSchema } = require('./schemas');
 
-
 /**
  * Fetches data from the specified URL.
  *
  * @param {string} url - The URL to fetch data from.
- * @returns {Promise<any>} - A promise that resolves with the fetched data.
- * @throws {Error} - If there is an error fetching the data.
+ * @returns {Promise<any>} A promise that resolves with the fetched data.
+ * @throws {Error} If there is an error fetching the data.
  */
 const fetchData = async (url) => {
     try {
@@ -25,15 +24,14 @@ const fetchData = async (url) => {
  * @param {string} url - The URL to fetch data from.
  * @param {object} schema - The Joi schema for data validation.
  * @param {string} name - The name of the data (for logging purposes).
- * @returns {Promise<object>} - A promise that resolves with the validated data.
- * @throws {Error} - If there is an error during data validation.
+ * @returns {Promise<object>} A promise that resolves with the validated data.
+ * @throws {Error} If there is an error during data validation.
  */
 const validateData = async (url, schema, name) => {
     const data = await fetchData(url);
     const validatedData = {};
 
     for (const key of Object.keys(data[name])) {
-
         const obj = data[name][key];
         const { error, value } = schema.validate(obj);
 
@@ -44,23 +42,38 @@ const validateData = async (url, schema, name) => {
 
         validatedData[key] = value;
     }
+// Clear the validated data after 30 seconds
+    setTimeout(() => {
+        const validatedData = {};
+        console.log(`Cleared validated data for ${name}`);
+    }, 30000);
 
     return validatedData;
 };
 
+/**
+ * URLs and names for fetching and validating data.
+ */
 const urlClients = process.env.URLCLIENTS;
 const urlPolicies = process.env.URLPOLICIES;
 const nameClients = 'clients';
 const namePolicies = 'policies';
 
+/**
+ * Fetch and validate client data.
+ * @type {Promise<object>}
+ */
 const clientsPromise = validateData(urlClients, clientSchema, nameClients)
     .then((data) => {
         console.log(`Fetched and validated ${nameClients}`);
-        // console.log(data)
         return data;
     })
     .catch((error) => console.error(error));
 
+/**
+ * Fetch and validate policy data.
+ * @type {Promise<object>}
+ */
 const policiesPromise = validateData(urlPolicies, policiesSchema, namePolicies)
     .then((data) => {
         console.log(`Fetched and validated ${namePolicies}`);

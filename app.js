@@ -1,12 +1,20 @@
+// Default imports
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var helmet = require('helmet');
+var rateLimit = require('express-rate-limit');
+var cors = require('cors');
 
+// Router imports
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var clientsRouter = require('./routes/clients');
+const loginRouter = require('./routes/login');
 
+//  Launch app
 var app = express();
 
 // view engine setup
@@ -14,13 +22,21 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
+app.use(helmet()); // sets HTTP headers for security
+app.use(cors()); // allows Cross-Origin Resource Sharing
+app.use(rateLimit({ // rate limits to 100 requests per 15 minutes
+  windowMs: 15 * 60 * 1000,
+  max: 100
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Router app
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/clients', clientsRouter);
+app.use('/login', loginRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -40,4 +56,3 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
-console.log('test');

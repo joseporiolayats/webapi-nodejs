@@ -11,8 +11,10 @@ var cors = require('cors');
 
 // Router imports
 var indexRouter = require('./routes/index');
+var loginRouter = require('./routes/login');
 var clientsRouter = require('./routes/clients');
-const loginRouter = require('./routes/login');
+var policiesRouter = require('./routes/policies');
+
 
 //  Launch app
 var app = express();
@@ -35,8 +37,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Router app
 app.use('/', indexRouter);
-app.use('/clients', clientsRouter);
 app.use('/login', loginRouter);
+app.use('/clients', clientsRouter);
+app.use('/policies', policiesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

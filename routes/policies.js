@@ -28,8 +28,19 @@ const checkUserRole = (req, res, next) => {
  * @returns {Error} 404 - Policy or User not found.
  * @returns {Error} 500 - Internal server error.
  */
+
+const refreshData = () => {
+    delete require.cache[require.resolve('../data')];
+    const data = require('../data');
+    clientsPromise = data.clientsPromise;
+    policiesPromise = data.policiesPromise;
+};
 router.get('/by_policy/:id', authenticateToken, checkUserRole, async (req, res) => {
     try {
+        if (!clientsPromise || !policiesPromise) {
+            refreshData();
+        }
+
         const id = req.params.id.toLowerCase();
         const clients = await clientsPromise;
         const policies = await policiesPromise;
@@ -75,6 +86,10 @@ router.get('/by_policy/:id', authenticateToken, checkUserRole, async (req, res) 
  */
 router.get('/by_client_name/:name', authenticateToken, checkUserRole, async (req, res) => {
     try {
+        if (!clientsPromise || !policiesPromise) {
+            refreshData();
+        }
+
         const name = req.params.name.toLowerCase();
         const clients = await clientsPromise;
         const policies = await policiesPromise;

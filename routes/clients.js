@@ -1,6 +1,7 @@
 const express = require('express');
-let { clientsPromise } = require('../data');
+let { clientsPromise, policiesPromise} = require('../data');
 const { authenticateToken } = require('../auth');
+const data = require("../data");
 const router = express.Router();
 
 const allowedRoles = ['user', 'admin'];
@@ -19,6 +20,13 @@ const checkUserRole = (req, res, next) => {
     next();
 };
 
+const refreshData = () => {
+    delete require.cache[require.resolve('../data')];
+    const data = require('../data');
+    clientsPromise = data.clientsPromise;
+    policiesPromise = data.policiesPromise;
+};
+
 /**
  * Route to get user information by name.
  * @route GET /name/:name
@@ -30,6 +38,10 @@ const checkUserRole = (req, res, next) => {
  */
 router.get('/name/:name', authenticateToken, checkUserRole, async (req, res) => {
     try {
+        if (!clientsPromise) {
+            refreshData();
+        }
+
         const name = req.params.name.toLowerCase();
         const clients = await clientsPromise;
 
@@ -65,6 +77,10 @@ router.get('/name/:name', authenticateToken, checkUserRole, async (req, res) => 
  */
 router.get('/id/:id', authenticateToken, checkUserRole, async (req, res) => {
     try {
+        if (!clientsPromise) {
+            refreshData();
+        }
+
         const id = req.params.id.toLowerCase();
         const clients = await clientsPromise;
 
@@ -100,6 +116,11 @@ router.get('/id/:id', authenticateToken, checkUserRole, async (req, res) => {
  */
 router.get('/email/:email', authenticateToken, checkUserRole, async (req, res) => {
     try {
+
+        if (!clientsPromise) {
+            refreshData();
+        }
+
         const email = req.params.email.toLowerCase();
         const clients = await clientsPromise;
         const user = Object.values(clients).find(
@@ -134,6 +155,10 @@ router.get('/email/:email', authenticateToken, checkUserRole, async (req, res) =
  */
 router.get('/role/:role', authenticateToken, checkUserRole, async (req, res) => {
     try {
+        if (!clientsPromise) {
+            refreshData();
+        }
+
         const role = req.params.role.toLowerCase();
         const clients = await clientsPromise;
         const matchedUsers = Object.values(clients).filter(
